@@ -2,10 +2,11 @@ import { Piece } from './piece.js';
 import { Cell } from './cell.js';
 
 class Board {
-  constructor(cellWidth) {
+  constructor(cellWidth, player) {
     this.cellWidth = cellWidth;
     this.board = [];
     this.turn = 0; // 0 for first player, 1 for second player.
+    this.player = player; // 0 if the user is black, 1 if the user is red.
     this.selectedPiece = undefined;
     this.validMoves = undefined;
 
@@ -68,7 +69,7 @@ class Board {
       for (let j = 0; j < moves[i].length; j++) {
         const move = moves[i][j];
         // If the difference in rows is more than 1, then it was a capture.
-        if (Math.abs(move[0] - pieces[i].location[1])) {
+        if (Math.abs(move[0] - pieces[i].location[1]) > 1) {
           hasCapture = true;
           break;
         }
@@ -82,11 +83,11 @@ class Board {
     // If there was a capture, we must filter out all of the moves that are non-capturing.
     if (hasCapture) {
       for (let i = 0; i < moves.length; i++) {
-        moves[i] = moves[i].filter(move => Math.abs(move[0] - pieces[i].location[1] > 1));
+        moves[i] = moves[i].filter(move => Math.abs(move[0] - pieces[i].location[1]) > 1);
       }
     }
 
-    return [pieces, moves];
+    return moves;
   }
 
   getValidMoves(piece) {
@@ -151,18 +152,24 @@ class Board {
 
   click(row, col) {
     const piece = this.board[row][col].piece;
-    if (piece) {
+    if (piece && piece.color == this.turn) {
       if (this.selectedPiece) {
         this.displayMoves(this.getValidMoves(this.selectedPiece), false);
       }
-      this.displayMoves(this.getValidMoves(piece), true);
+
+      const pieces = this.turn == 0 ? this.blackPieces : this.redPieces;
+      const idx = pieces.indexOf(piece);
+      const moves = this.validMoves[idx];
+      this.displayMoves(moves, true);
       this.selectedPiece = piece;
     } else if (this.board[row][col].isHighlighted) {
       this.displayMoves(this.getValidMoves(this.selectedPiece), false);
       this.move(this.selectedPiece, [row, col]);
       this.selectedPiece = undefined;
     } else {
-      this.displayMoves(this.getValidMoves(this.selectedPiece), false);
+      if (this.selectedPiece) {
+        this.displayMoves(this.getValidMoves(this.selectedPiece), false);
+      }
     }
   }
 
@@ -174,6 +181,9 @@ class Board {
     this.board[row][col].piece = piece;
     this.board[oldRow][oldCol].piece = undefined;
 
+    // True if the moved piece just captured a piece and can keep capturing.
+    let hasMoreCaptures = false;
+
     // Check if the move was a capture. If so, we need to do some work.
     if (Math.abs(row - oldRow) > 1) {
       // Remove the piece inbetween and remove it from its list.
@@ -182,10 +192,40 @@ class Board {
       const enemyPiece = enemyCell.piece;
       enemyCell.piece = undefined;
 
-      const idx = enemyList.indexOf(enemyPiece);
+      let idx = enemyList.indexOf(enemyPiece);
       enemyList.splice(idx, 1);
+
+      // Check and see if that moved piece can do more captures.
+      const otherMoves = this.getValidMoves(piece);
+      for (let i = 0; i < otherMoves.length; i++) {
+        if (Math.abs(otherMoves[i][0] - row) > 1) {
+          hasMoreCaptures = true;
+          break;
+        }
+      } 
+
+      // If we have more captures, this piece must continue its captures so all other valid moves are erased.
+      if (hasMoreCaptures) {
+        const pieceList = piece.color == 0 ? this.blackPieces : this.redPieces;
+        idx = pieceList.indexOf(piece);
+       
+        for (let i = 0; i < this.validMoves.length; i++) {
+          this.validMoves[i] = [];
+        }
+
+        this.validMoves[idx] = otherMoves;
+      }
+    }
+
+
+    // We only switch turns if the moved piece has no more captures.
+    if (!hasMoreCaptures) {
+      this.turn = Math.abs(this.turn - 1);
+      // Update the valid moves.
+      this.updateValidMoves();
     }
   }
+
 
   isValidIndex(i) {
     return i >= 0 && i < 8;
