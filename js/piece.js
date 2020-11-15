@@ -46,7 +46,28 @@ class Piece {
         // Convert board coordinates to pixel coordaintes.
         let pixelCoords = this.location.map(c => (c + .5) * this.cellWidth);
         circle(...pixelCoords, this.cellWidth * .8);
+
+        // Draw a star if this has been kinged.
+        if (this.isKing) {
+            fill(255, 221, 0);
+            star(...pixelCoords, this.cellWidth *.3, this.cellWidth *.05, 3);
+        }
     }
+}
+
+function star(x, y, radius1, radius2, npoints) {
+  let angle = TWO_PI / npoints;
+  let halfAngle = angle / 2.0;
+  beginShape();
+  for (let a = 0; a < TWO_PI; a += angle) {
+    let sx = x + cos(a) * radius2;
+    let sy = y + sin(a) * radius2;
+    vertex(sx, sy);
+    sx = x + cos(a + halfAngle) * radius1;
+    sy = y + sin(a + halfAngle) * radius1;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
 }
 
 export { Piece };

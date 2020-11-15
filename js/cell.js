@@ -1,4 +1,5 @@
 const brown = [194, 156, 107];
+const darkBrown = [102, 71, 32];
 const green = [170, 255, 79];
 
 class Cell {
@@ -22,14 +23,18 @@ class Cell {
     }
 
     draw() {
+        const [col, row] = this.location;
         if (this.isHighlighted) {
             fill(...green);
         } else {
-            fill(...brown);
+            if ((col + row) % 2 == 0) {
+                fill(...darkBrown);
+            } else {
+                fill(...brown);
+            }
         }
-        stroke(0);
-        const [col, row] = this.location;
 
+        stroke(0);
         square(col * this.cellWidth, row * this.cellWidth, this.cellWidth);
         // If there is a piece here, draw it.
         if (this.piece) {

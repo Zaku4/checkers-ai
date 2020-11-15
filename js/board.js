@@ -20,22 +20,25 @@ class Board {
     }
 
     this.blackPieces = [];
-    // Place starting black pieces.
+    this.redPieces = [];
+
+    const playerPieces = this.player == 0 ? this.blackPieces : this.redPieces;
+    const cpuPieces = this.player == 0 ? this.redPieces : this.blackPieces; 
+    // Place starting player pieces.
     for (let row = 5; row < 8; row++) {
       for (let col = row % 2; col < 8; col += 2) {
-        const piece = new Piece(0, [col, row], this.cellWidth);
+        const piece = new Piece(this.player, [col, row], this.cellWidth);
         this.board[row][col].piece = piece;
-        this.blackPieces.push(piece);
+        playerPieces.push(piece);
       }
     }
 
-    this.redPieces = [];
-    // Place starting red pieces.
+    // Place starting cpu pieces.
     for (let row = 0; row < 3; row++) {
       for (let col = row % 2; col < 8; col += 2) {
-        const piece = new Piece(1, [col, row], this.cellWidth);
+        const piece = new Piece(Math.abs(this.player - 1), [col, row], this.cellWidth);
         this.board[row][col].piece = piece;
-        this.redPieces.push(piece);
+        cpuPieces.push(piece);
       }
     }
 
@@ -96,7 +99,7 @@ class Board {
     // Directions represents in which directions we should check for valid moves.
     const directions = [];
     // Black moves upwards.
-    directions.push(piece.color == 0 ? -1 : 1);
+    directions.push(piece.color == this.player ? -1 : 1);
 
     // If the piece is a king, it can also move in the reverse direction.
     if (piece.isKing) {
@@ -221,6 +224,11 @@ class Board {
     // We only switch turns if the moved piece has no more captures.
     if (!hasMoreCaptures) {
       this.turn = Math.abs(this.turn - 1);
+      // If the piece reached the other side, king it.
+      const otherSide = piece.color == this.player ? 0 : 7;
+      if (row == otherSide) {
+        piece.isKing = true;
+      }
       // Update the valid moves.
       this.updateValidMoves();
     }
