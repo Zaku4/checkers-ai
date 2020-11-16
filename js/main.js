@@ -102,7 +102,7 @@ function showRules() {
 
 function reset() {
   board = new Board(cellWidth, playerTurn, true)
-  ai = new AI(1);
+  ai = new AI(8);
   drawnClick = false;
   hasShownWinAlert = false;
 }
