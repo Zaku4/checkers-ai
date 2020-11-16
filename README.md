@@ -8,5 +8,8 @@ If I had to redo this project, I definitely would have spent more time designing
 
 The mini-max algorithm was fairly easy to set up, particularly since I had already built the algorithm before. The algorithm looks 8 steps into the future, using alpha-beta pruning to reduce the amount of board states analyzed. Once the max depth of recursion is reached, the board state is analyzed using a heuristic. For this implementation, a board is rated based on the pieces in play. Regular pieces are worth 1, and kinged pieces are worth 2. The total value of red and black pieces are calculated separately, and the difference is taken `black_pieces - red_pieces`. The black player seeks to maximize this value, and the red player seeks to minimize the value.
 
+## Known Bugs
+While the AI is thinking, the user cannot interact with the UI. This is due to the fact that Javascript does not support multithreading, so I cannot move the AI processing to a different thread. I'm not sure how I can work around this, so that's a bug that is staying for the time being.
+
 ## How to Use
 You can play against the AI at https://defcoding.github.io/checkers-ai
