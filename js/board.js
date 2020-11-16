@@ -2,13 +2,15 @@ import { Piece } from './piece.js';
 import { Cell } from './cell.js';
 
 class Board {
-  constructor(cellWidth, player) {
+  constructor(cellWidth, player, doSetup) {
     this.cellWidth = cellWidth;
     this.board = [];
     this.turn = 0; // 0 for first player, 1 for second player.
     this.player = player; // 0 if the user is black, 1 if the user is red.
     this.selectedPiece = undefined;
     this.validMoves = undefined;
+    this.blackPieces = [];
+    this.redPieces = [];
 
     // Create the board.
     for (let row = 0; row < 8; row++) {
@@ -19,30 +21,30 @@ class Board {
       this.board.push(columns);
     }
 
-    this.blackPieces = [];
-    this.redPieces = [];
 
-    const playerPieces = this.player == 0 ? this.blackPieces : this.redPieces;
-    const cpuPieces = this.player == 0 ? this.redPieces : this.blackPieces; 
-    // Place starting player pieces.
-    for (let row = 5; row < 8; row++) {
-      for (let col = row % 2; col < 8; col += 2) {
-        const piece = new Piece(this.player, [col, row], this.cellWidth);
-        this.board[row][col].piece = piece;
-        playerPieces.push(piece);
+    if (doSetup) {
+      const playerPieces = this.player == 0 ? this.blackPieces : this.redPieces;
+      const cpuPieces = this.player == 0 ? this.redPieces : this.blackPieces; 
+      // Place starting player pieces.
+      for (let row = 5; row < 8; row++) {
+        for (let col = row % 2; col < 8; col += 2) {
+          const piece = new Piece(this.player, [col, row], this.cellWidth);
+          this.board[row][col].piece = piece;
+          playerPieces.push(piece);
+        }
       }
-    }
 
-    // Place starting cpu pieces.
-    for (let row = 0; row < 3; row++) {
-      for (let col = row % 2; col < 8; col += 2) {
-        const piece = new Piece(Math.abs(this.player - 1), [col, row], this.cellWidth);
-        this.board[row][col].piece = piece;
-        cpuPieces.push(piece);
+      // Place starting cpu pieces.
+      for (let row = 0; row < 3; row++) {
+        for (let col = row % 2; col < 8; col += 2) {
+          const piece = new Piece(1 - this.player, [col, row], this.cellWidth);
+          this.board[row][col].piece = piece;
+          cpuPieces.push(piece);
+        }
       }
-    }
 
-    this.updateValidMoves();
+      this.updateValidMoves();
+    }
   }
 
   updateValidMoves() {
@@ -220,10 +222,9 @@ class Board {
       }
     }
 
-
     // We only switch turns if the moved piece has no more captures.
     if (!hasMoreCaptures) {
-      this.turn = Math.abs(this.turn - 1);
+      this.turn = 1 - this.turn
       // If the piece reached the other side, king it.
       const otherSide = piece.color == this.player ? 0 : 7;
       if (row == otherSide) {
@@ -234,6 +235,42 @@ class Board {
     }
   }
 
+  // Please forgive me for this sin, but I just want to get this working.
+  makeAIMove(idx, move) {
+    const pieces = this.turn == 0 ? this.blackPieces : this.redPieces;
+    this.move(pieces[idx], move);
+  }
+
+  deepCopy() {
+    const copy = new Board(this.cellWidth, this.player, false);
+    copy.turn = this.turn;
+    this.blackPieces.forEach(piece => {
+      const copyPiece = piece.deepCopy();
+      const [col, row] = copyPiece.location;
+      copy.board[row][col].piece = copyPiece;
+      copy.blackPieces.push(copyPiece);
+    });
+
+    this.redPieces.forEach(piece => {
+      const copyPiece = piece.deepCopy();
+      const [col, row] = copyPiece.location;
+      copy.board[row][col].piece = copyPiece;
+      copy.redPieces.push(copyPiece);
+    });
+
+    copy.validMoves = [...this.validMoves]; 
+
+    return copy;
+  }
+
+
+  getWinner() {
+    if (this.validMoves.length != 0) {
+      return -1;
+    } else {
+      return 1 - this.turn;
+    }
+  }
 
   isValidIndex(i) {
     return i >= 0 && i < 8;

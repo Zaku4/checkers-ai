@@ -34,6 +34,12 @@ class Piece {
         return this._location;
     }
 
+    deepCopy() {
+        const copy = new Piece(this.color, this.location, this.cellWidth);
+        copy.isKing = this.isKing;
+        return copy;
+    }
+
     draw() {
         if (this.color == 0) {
             fill(0);
