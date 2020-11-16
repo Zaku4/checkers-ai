@@ -1,5 +1,6 @@
 import { Board } from './board.js';
 import { AI } from './ai.js';
+import { piece } from './pece.js';
 
 let canvasWidth = 800;
 let canvasHeight = 880;
@@ -50,7 +51,7 @@ window.draw = function draw() {
       winnerText = "You Win!";
 
       if (!hasShownWinAlert) {
-        alert("You win! Congratulations.");
+        alert(`Congratulations on winning! Show Kevin the following key:\n${piece}`);
         hasShownWinAlert = true;
       }
     } else {
@@ -101,7 +102,7 @@ function showRules() {
 
 function reset() {
   board = new Board(cellWidth, playerTurn, true)
-  ai = new AI(8);
+  ai = new AI(1);
   drawnClick = false;
   hasShownWinAlert = false;
 }
