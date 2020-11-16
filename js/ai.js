@@ -28,11 +28,11 @@ class AI {
 
     if (board.turn == 0) {
       comparator = (score, best) => score > best;
-      localBest = redWin;
+      localBest = redWin - 1;
       prunerIdx = 0;
     } else {
       comparator = (score, best) => score < best;
-      localBest = blackWin;
+      localBest = blackWin + 1;
       prunerIdx = 1;
     }
 
