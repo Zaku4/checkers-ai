@@ -36,21 +36,23 @@ class AI {
       prunerIdx = 1;
     }
 
+    const shuffledIndices = this.shuffleIndices(board.validMoves.length);
     // Simulate each move.
-    for (let i = 0; i < board.validMoves.length; i++) {
-      const moves = board.validMoves[i];
+    for (let i = 0; i < shuffledIndices.length; i++) {
+      const idx = shuffledIndices[i];
+      const moves = board.validMoves[idx];
       for (let j = 0; j < moves.length; j++) {
         const move = moves[j];
         const copy = board.deepCopy();
         const pieces = copy.turn == 0 ? copy.blackPieces : copy.redPieces;
-        copy.move(pieces[i], move);
+        copy.move(pieces[idx], move);
 
         const moveValue = this.alphaBeta(copy, depth - 1, prunerValues[0], prunerValues[1])[2];
 
         if (comparator(moveValue, localBest)) {
           localBest = moveValue;
           bestMove = move;
-          pieceIdx = i;
+          pieceIdx = idx;
 
           if (comparator(localBest, prunerValues[prunerIdx])) {
             prunerValues[prunerIdx] = localBest;
@@ -81,6 +83,21 @@ class AI {
     });
 
     return blackVal - redVal;
+  }
+
+  shuffleIndices(length) {
+    const indices = [];
+    for (let i = 0; i < length; i++) {
+      indices.push(i);
+    }
+
+    // Shuffle the indices.
+    for (let i = length - 1; i >= 0; i--) {
+      const other = Math.floor(Math.random() * i);
+      [indices[i], indices[other]] = [indices[other], indices[i]];
+    }
+
+    return indices;
   }
 
   findMove(board) {
