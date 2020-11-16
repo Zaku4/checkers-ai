@@ -62,7 +62,7 @@ window.draw = function draw() {
     text(winnerText, 400, boardWidth + 50);
   }
 
-  if (drawnClick && board.turn != playerTurn) {
+  if (drawnClick && winner == -1 && board.turn != playerTurn) {
     const result = ai.findMove(board);
     board.makeAIMove(...result);
   }
@@ -102,7 +102,7 @@ function showRules() {
 
 function reset() {
   board = new Board(cellWidth, playerTurn, true)
-  ai = new AI(8);
+  ai = new AI(1);
   drawnClick = false;
   hasShownWinAlert = false;
 }
