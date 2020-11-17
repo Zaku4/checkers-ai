@@ -4,6 +4,7 @@ const redWin = Number.MIN_SAFE_INTEGER
 class AI {
   constructor(maxDepth) {
     this.maxDepth = maxDepth;
+    this.boardStates = 0;
   }
 
   alphaBeta(board, depth, alpha, beta) {
@@ -15,10 +16,13 @@ class AI {
     const winner = board.getWinner();
 
     if (winner == 0) {
+      this.boardStates += 1;
       return [bestMove, pieceIdx, blackWin];
     } else if (winner == 1) {
+      this.boardStates += 1;
       return [bestMove, pieceIdx, redWin];
     } else if (depth == 0) {
+      this.boardStates += 1;
       return [bestMove, pieceIdx, this.heuristic(board)]
     }
 
@@ -101,10 +105,9 @@ class AI {
   }
 
   findMove(board) {
+    this.boardStates = 0;
     const result = this.alphaBeta(board, this.maxDepth, redWin, blackWin);
-    if (!result[0]) {
-      console.log(result);
-    }
+    console.log(`Calculated ${this.boardStates} board states.`);
     return [result[1], result[0]];
   }
 }
