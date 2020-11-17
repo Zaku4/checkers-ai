@@ -77,13 +77,23 @@ class AI {
 
   heuristic(board) {
     let blackVal = 0;
+    // A regular piece has a starting value of 1, and an additional value based on how close it is to being kinged.
+    // A kinged piece just needs to have a higher value than that.
     board.blackPieces.forEach(piece => {
-      blackVal += piece.isKing ? 2 : 1;
+      if (!piece.isKing) {
+        blackVal += 1 + (board.player == 0 ? piece.location[1] : 7 - piece.location[1]);
+      } else {
+        blackVal += 10;
+      }
     });
 
     let redVal = 0;
     board.redPieces.forEach(piece => {
-      redVal += piece.isKing ? 2 : 1;
+      if (!piece.isKing) {
+        redVal += 1 + (board.player == 1 ? piece.location[1] : 7 - piece.location[1]);
+      } else {
+        redVal += 10;
+      }
     });
 
     return blackVal - redVal;
